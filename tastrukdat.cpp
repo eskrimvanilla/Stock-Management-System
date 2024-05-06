@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include <algorithm>
 using namespace std;
 
 struct StockItem {
@@ -33,19 +34,6 @@ CategoryNode* insertCategory(CategoryNode* root, string categoryName) {
     return root;
 }
 
-void printCategories(CategoryNode* root, string& prevCategory) {
-    if (root == nullptr) {
-        return;
-    }
-
-    printCategories(root->left, prevCategory);
-    if (root->name != prevCategory) {
-        cout << root->name << endl;
-        prevCategory = root->name;
-    }
-    printCategories(root->right, prevCategory);
-}
-
 void addStock(vector<StockItem>& stock, CategoryNode*& categoryTree) {
     StockItem newItem;
     cout << "Enter the name of the stock item: ";
@@ -63,6 +51,42 @@ void addStock(vector<StockItem>& stock, CategoryNode*& categoryTree) {
     cout << "Stock item added successfully!" << endl;
 }
 
+void updateStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory, int quantityChanged) {
+    bool found = false;
+    for (auto& item : stock) {
+        if (item.name == itemName && item.category == itemCategory) {
+            if (quantityChanged > 0) {
+                item.quantity += quantityChanged;
+                cout << "Stock quantity for '" << itemName << "' in category '" << itemCategory << "' increased to " << item.quantity << endl;
+            } else if (quantityChanged < 0 && item.quantity >= abs(quantityChanged)) {
+                item.quantity -= abs(quantityChanged);
+                cout << "Stock quantity for '" << itemName << "' in category '" << itemCategory << "' decreased to " << item.quantity << endl;
+            } else {
+                cout << "Invalid quantity change! Transaction failed." << endl;
+                return;
+            }
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
+    }
+}
+
+void deleteStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory) {
+    auto it = remove_if(stock.begin(), stock.end(), [&](const StockItem& item) {
+        return item.name == itemName && item.category == itemCategory;
+    });
+
+    if (it != stock.end()) {
+        stock.erase(it, stock.end());
+        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' deleted successfully!" << endl;
+    } else {
+        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
+    }
+}
+
 void displayStock(const vector<StockItem>& stock) {
     if (stock.empty()) {
         cout << "No stock items available!" << endl;
@@ -74,23 +98,17 @@ void displayStock(const vector<StockItem>& stock) {
     }
 }
 
-void updateStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory, int quantitySold) {
-    bool found = false;
-    for (auto& item : stock) {
-        if (item.name == itemName && item.category == itemCategory) {
-            if (item.quantity >= quantitySold) {
-                item.quantity -= quantitySold;
-                cout << "Transaction successful. Updated stock quantity for '" << itemName << "' in category '" << itemCategory << "' is " << item.quantity << endl;
-            } else {
-                cout << "Insufficient stock for '" << itemName << "' in category '" << itemCategory << "'. Transaction failed!" << endl;
-            }
-            found = true;
-            break;
-        }
+void printCategories(CategoryNode* root, string& prevCategory) {
+    if (root == nullptr) {
+        return;
     }
-    if (!found) {
-        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
+
+    printCategories(root->left, prevCategory);
+    if (root->name != prevCategory) {
+        cout << root->name << endl;
+        prevCategory = root->name;
     }
+    printCategories(root->right, prevCategory);
 }
 
 void findStockByCategory(const vector<StockItem>& stock, const string& category) {
@@ -117,7 +135,7 @@ void findStockByName(const vector<StockItem>& stock, const string& itemName) {
         }
     }
     if (!found) {
-        cout << "No stock items found with name '" << itemName << "'." << endl;
+        cout << "No stock items found with the name '" << itemName << "'." << endl;
     }
 }
 
@@ -128,14 +146,15 @@ int main() {
     int choice;
     string itemName, itemCategory;
     do {
-        cout << "\nStock Management System\n";
+        cout << "\n=== Stock Management System ===\n";
         cout << "1. Add new stock\n";
-        cout << "2. Display all stock\n";
-        cout << "3. Update stock after transaction\n";
-        cout << "4. Display categories\n";
-        cout << "5. Find stock by category\n";
-        cout << "6. Find stock by name\n";
-        cout << "7. Exit\n";
+        cout << "2. Update stock\n";
+        cout << "3. Delete stock\n";
+        cout << "4. Display all stock\n";
+        cout << "5. Display categories\n";
+        cout << "6. Find stock by category\n";
+        cout << "7. Find stock by name\n";
+        cout << "8. Exit\n";
         cout << "Enter your choice: ";
         
         if (!(cin >> choice)) {
@@ -149,46 +168,54 @@ int main() {
             case 1:
                 addStock(stock, categoryTree);
                 break;
-            case 2:
-                displayStock(stock);
-                break;
-            case 3: {
-                int quantitySold;
+            case 2: {
+                int quantityChanged;
                 cout << "Enter the name of the stock item: ";
                 cin >> itemName;
                 cout << "Enter the category of the stock item: ";
                 cin >> itemCategory;
-                cout << "Enter the quantity sold: ";
-                cin >> quantitySold;
-                updateStock(stock, itemName, itemCategory, quantitySold);
+                cout << "Enter the quantity changed: ";
+                cin >> quantityChanged;
+                updateStock(stock, itemName, itemCategory, quantityChanged);
                 break;
             }
-            case 4: {
+            case 3: {
+                cout << "Enter the name of the stock item: ";
+                cin >> itemName;
+                cout << "Enter the category of the stock item: ";
+                cin >> itemCategory;
+                deleteStock(stock, itemName, itemCategory);
+                break;
+            }
+            case 4:
+                displayStock(stock);
+                break;
+            case 5: {
                 cout << "Categories:\n";
                 string prevCategory = "";
                 printCategories(categoryTree, prevCategory);
                 break;
             }
-            case 5: {
+            case 6: {
                 string category;
                 cout << "Enter the category: ";
                 cin >> category;
                 findStockByCategory(stock, category);
                 break;
             }
-            case 6: {
+            case 7: {
                 cout << "Enter the name of the stock item: ";
                 cin >> itemName;
                 findStockByName(stock, itemName);
                 break;
             }
-            case 7:
+            case 8:
                 cout << "Exiting program...\n";
                 break;
             default:
-                cout << "Invalid choice! Please enter a number from 1 to 7." << endl;
+                cout << "Invalid choice! Please enter a number from 1 to 8." << endl;
         }        
-    } while (choice != 7);
+    } while (choice != 8);
 
     return 0;
 }

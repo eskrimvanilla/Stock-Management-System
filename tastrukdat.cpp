@@ -3,6 +3,7 @@
 #include <string>
 #include <limits>
 #include <algorithm>
+#include <queue>
 using namespace std;
 
 struct StockItem {
@@ -20,6 +21,17 @@ struct CategoryNode {
     CategoryNode(string categoryName) : name(categoryName), left(nullptr), right(nullptr) {}
 };
 
+struct Notification {
+    string message;
+    int priority;
+
+    Notification(string msg, int prio) : message(msg), priority(prio) {}
+    
+    bool operator<(const Notification& other) const {
+        return priority < other.priority;
+    }
+};
+
 CategoryNode* insertCategory(CategoryNode* root, string categoryName) {
     if (root == nullptr) {
         return new CategoryNode(categoryName);
@@ -34,7 +46,7 @@ CategoryNode* insertCategory(CategoryNode* root, string categoryName) {
     return root;
 }
 
-void addStock(vector<StockItem>& stock, CategoryNode*& categoryTree) {
+void addStock(vector<StockItem>& stock, CategoryNode*& categoryTree, priority_queue<Notification>& notifications) {
     StockItem newItem;
     cout << "Enter the name of the stock item: ";
     cin >> newItem.name;
@@ -48,10 +60,11 @@ void addStock(vector<StockItem>& stock, CategoryNode*& categoryTree) {
     categoryTree = insertCategory(categoryTree, newItem.category);
 
     stock.push_back(newItem);
+    notifications.push(Notification("Stock item added: " + newItem.name, 1));
     cout << "Stock item added successfully!" << endl;
 }
 
-void updateStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory, int quantityChanged) {
+void updateStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory, int quantityChanged, priority_queue<Notification>& notifications) {
     bool found = false;
     for (auto& item : stock) {
         if (item.name == itemName && item.category == itemCategory) {
@@ -71,10 +84,12 @@ void updateStock(vector<StockItem>& stock, const string& itemName, const string&
     }
     if (!found) {
         cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
+    } else {
+        notifications.push(Notification("Stock item updated: " + itemName + " in category " + itemCategory, 2));
     }
 }
 
-void deleteStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory) {
+void deleteStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory, priority_queue<Notification>& notifications) {
     auto it = remove_if(stock.begin(), stock.end(), [&](const StockItem& item) {
         return item.name == itemName && item.category == itemCategory;
     });
@@ -82,6 +97,7 @@ void deleteStock(vector<StockItem>& stock, const string& itemName, const string&
     if (it != stock.end()) {
         stock.erase(it, stock.end());
         cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' deleted successfully!" << endl;
+        notifications.push(Notification("Stock item deleted: " + itemName + " in category " + itemCategory, 3));
     } else {
         cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
     }
@@ -139,9 +155,22 @@ void findStockByName(const vector<StockItem>& stock, const string& itemName) {
     }
 }
 
+void addNotification(priority_queue<Notification>& notifications, const string& message, int priority) {
+    notifications.push(Notification(message, priority));
+}
+
+void showNotifications(priority_queue<Notification>& notifications) {
+    while (!notifications.empty()) {
+        Notification notification = notifications.top();
+        cout << "Notification: " << notification.message << endl;
+        notifications.pop();
+    }
+}
+
 int main() {
     vector<StockItem> stock;
     CategoryNode* categoryTree = nullptr;
+    priority_queue<Notification> notifications;
 
     int choice;
     string itemName, itemCategory;
@@ -154,7 +183,8 @@ int main() {
         cout << "5. Display categories\n";
         cout << "6. Find stock by category\n";
         cout << "7. Find stock by name\n";
-        cout << "8. Exit\n";
+        cout << "8. Show Notifications\n";
+        cout << "9. Exit\n";
         cout << "Enter your choice: ";
         
         if (!(cin >> choice)) {
@@ -166,7 +196,7 @@ int main() {
         
         switch(choice) {
             case 1:
-                addStock(stock, categoryTree);
+                addStock(stock, categoryTree, notifications);
                 break;
             case 2: {
                 int quantityChanged;
@@ -176,7 +206,7 @@ int main() {
                 cin >> itemCategory;
                 cout << "Enter the quantity changed: ";
                 cin >> quantityChanged;
-                updateStock(stock, itemName, itemCategory, quantityChanged);
+                updateStock(stock, itemName, itemCategory, quantityChanged, notifications);
                 break;
             }
             case 3: {
@@ -184,7 +214,7 @@ int main() {
                 cin >> itemName;
                 cout << "Enter the category of the stock item: ";
                 cin >> itemCategory;
-                deleteStock(stock, itemName, itemCategory);
+                deleteStock(stock, itemName, itemCategory, notifications);
                 break;
             }
             case 4:
@@ -210,12 +240,15 @@ int main() {
                 break;
             }
             case 8:
+                showNotifications(notifications);
+                break;
+            case 9:
                 cout << "Exiting program...\n";
                 break;
             default:
-                cout << "Invalid choice! Please enter a number from 1 to 8." << endl;
+                cout << "Invalid choice! Please enter a number from 1 to 9." << endl;
         }        
-    } while (choice != 8);
+    } while (choice != 9);
 
     return 0;
 }

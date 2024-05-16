@@ -48,20 +48,20 @@ CategoryNode* insertCategory(CategoryNode* root, string categoryName) {
 
 void addStock(vector<StockItem>& stock, CategoryNode*& categoryTree, priority_queue<Notification>& notifications) {
     StockItem newItem;
-    cout << "Enter the name of the stock item: ";
+    cout << "Masukkan nama barang stok: ";
     cin >> newItem.name;
-    cout << "Enter the quantity: ";
+    cout << "Masukkan kuantitas barang: ";
     cin >> newItem.quantity;
-    cout << "Enter the price per unit: ";
+    cout << "Masukkan harga per barang: ";
     cin >> newItem.price;
-    cout << "Enter the category: ";
+    cout << "Masukkan nama kategori: ";
     cin >> newItem.category;
 
     categoryTree = insertCategory(categoryTree, newItem.category);
 
     stock.push_back(newItem);
-    notifications.push(Notification("Stock item added: " + newItem.name, 1));
-    cout << "Stock item added successfully!" << endl;
+    notifications.push(Notification("Barang stok dimasukkan: " + newItem.name, 1));
+    cout << "Stok berhasil dimasukkan!" << endl;
 }
 
 void updateStock(vector<StockItem>& stock, const string& itemName, const string& itemCategory, int quantityChanged, priority_queue<Notification>& notifications) {
@@ -70,12 +70,12 @@ void updateStock(vector<StockItem>& stock, const string& itemName, const string&
         if (item.name == itemName && item.category == itemCategory) {
             if (quantityChanged > 0) {
                 item.quantity += quantityChanged;
-                cout << "Stock quantity for '" << itemName << "' in category '" << itemCategory << "' increased to " << item.quantity << endl;
+                cout << "Kuantitas stok untuk '" << itemName << "' di kategori '" << itemCategory << "' ditambah menjadi " << item.quantity << endl;
             } else if (quantityChanged < 0 && item.quantity >= abs(quantityChanged)) {
                 item.quantity -= abs(quantityChanged);
-                cout << "Stock quantity for '" << itemName << "' in category '" << itemCategory << "' decreased to " << item.quantity << endl;
+                cout << "Kuantitas stok untuk '" << itemName << "' di kategori '" << itemCategory << "' dikurangi menjadi " << item.quantity << endl;
             } else {
-                cout << "Invalid quantity change! Transaction failed." << endl;
+                cout << "Pengubahan kuantitas invalid! Update gagal." << endl;
                 return;
             }
             found = true;
@@ -83,9 +83,9 @@ void updateStock(vector<StockItem>& stock, const string& itemName, const string&
         }
     }
     if (!found) {
-        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
+        cout << "Barang stok '" << itemName << "' di kategori '" << itemCategory << "' tidak ditemukan!" << endl;
     } else {
-        notifications.push(Notification("Stock item updated: " + itemName + " in category " + itemCategory, 2));
+        notifications.push(Notification("Barang stok diupdate: " + itemName + " di kategori " + itemCategory, 2));
     }
 }
 
@@ -96,21 +96,21 @@ void deleteStock(vector<StockItem>& stock, const string& itemName, const string&
 
     if (it != stock.end()) {
         stock.erase(it, stock.end());
-        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' deleted successfully!" << endl;
-        notifications.push(Notification("Stock item deleted: " + itemName + " in category " + itemCategory, 3));
+        cout << "Barang stok '" << itemName << "' di kategori '" << itemCategory << "' berhasil dihapus!" << endl;
+        notifications.push(Notification("Barang stok dihapus: " + itemName + " di kategori " + itemCategory, 3));
     } else {
-        cout << "Stock item '" << itemName << "' in category '" << itemCategory << "' not found!" << endl;
+        cout << "Barang stok '" << itemName << "' di kategori '" << itemCategory << "' tidak ditemukan!" << endl;
     }
 }
 
 void displayStock(const vector<StockItem>& stock) {
     if (stock.empty()) {
-        cout << "No stock items available!" << endl;
+        cout << "Tidak ada barang yang tersedia!" << endl;
         return;
     }
-    cout << "Stock items:\n";
+    cout << "Barang stok:\n";
     for (const auto& item : stock) {
-        cout << "Name: " << item.name << ", Quantity: " << item.quantity << ", Price per unit: $" << item.price << ", Category: " << item.category << endl;
+        cout << "Nama: " << item.name << ", Kuantitas: " << item.quantity << ", Harga per barang: Rp" << item.price << ", Kategori: " << item.category << endl;
     }
 }
 
@@ -129,29 +129,29 @@ void printCategories(CategoryNode* root, string& prevCategory) {
 
 void findStockByCategory(const vector<StockItem>& stock, const string& category) {
     bool found = false;
-    cout << "Stock items in category '" << category << "':\n";
+    cout << "Barang stok di kategori '" << category << "':\n";
     for (const auto& item : stock) {
         if (item.category == category) {
-            cout << "Name: " << item.name << ", Quantity: " << item.quantity << ", Price per unit: $" << item.price << endl;
+            cout << "Nama: " << item.name << ", Kuantitas: " << item.quantity << ", Harga per barang: Rp" << item.price << endl;
             found = true;
         }
     }
     if (!found) {
-        cout << "No stock items found in category '" << category << "'." << endl;
+        cout << "Tidak ada barang stok ditemukan di kategori '" << category << "'." << endl;
     }
 }
 
 void findStockByName(const vector<StockItem>& stock, const string& itemName) {
     bool found = false;
-    cout << "Search results for stock item '" << itemName << "':\n";
+    cout << "Hasil pencarian untuk barang stok '" << itemName << "':\n";
     for (const auto& item : stock) {
         if (item.name == itemName) {
-            cout << "Category: " << item.category << ", Quantity: " << item.quantity << ", Price per unit: $" << item.price << endl;
+            cout << "Kategori: " << item.category << ", Kuantitas: " << item.quantity << ", Harga per barang: Rp" << item.price << endl;
             found = true;
         }
     }
     if (!found) {
-        cout << "No stock items found with the name '" << itemName << "'." << endl;
+        cout << "Tidak ada barang stok di temukan dengan nama '" << itemName << "'." << endl;
     }
 }
 
@@ -162,7 +162,7 @@ void addNotification(priority_queue<Notification>& notifications, const string& 
 void showNotifications(priority_queue<Notification>& notifications) {
     while (!notifications.empty()) {
         Notification notification = notifications.top();
-        cout << "Notification: " << notification.message << endl;
+        cout << "Notifikasi: " << notification.message << endl;
         notifications.pop();
     }
 }
@@ -175,20 +175,20 @@ int main() {
     int choice;
     string itemName, itemCategory;
     do {
-        cout << "\n=== Stock Management System ===\n";
-        cout << "1. Add new stock\n";
-        cout << "2. Update stock\n";
-        cout << "3. Delete stock\n";
-        cout << "4. Display all stock\n";
-        cout << "5. Display categories\n";
-        cout << "6. Find stock by category\n";
-        cout << "7. Find stock by name\n";
-        cout << "8. Show Notifications\n";
-        cout << "9. Exit\n";
-        cout << "Enter your choice: ";
+        cout << "\n=== Manajemen Stok Barang ===\n";
+        cout << "1. Tambahkan barang stok baru\n";
+        cout << "2. Update barang stok\n";
+        cout << "3. Hapus barang stok\n";
+        cout << "4. Tampilkan seluruh barang stok\n";
+        cout << "5. Tampilkan kategori barang\n";
+        cout << "6. Cari barang stok berdasarkan kategori\n";
+        cout << "7. Cari barang stok berdasarkan nama\n";
+        cout << "8. Tampilkan notifikasi\n";
+        cout << "9. Keluar\n";
+        cout << "Masukkan pilihanmu: ";
         
         if (!(cin >> choice)) {
-            cout << "Invalid input! Please enter a number.\n";
+            cout << "Input invalid! Tolong masukkan nomor.\n";
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
@@ -200,19 +200,19 @@ int main() {
                 break;
             case 2: {
                 int quantityChanged;
-                cout << "Enter the name of the stock item: ";
+                cout << "Masukkan nama barang stok: ";
                 cin >> itemName;
-                cout << "Enter the category of the stock item: ";
+                cout << "Masukkan kategori dari barang stok: ";
                 cin >> itemCategory;
-                cout << "Enter the quantity changed: ";
+                cout << "Masukkan kuantitas yang diubah: ";
                 cin >> quantityChanged;
                 updateStock(stock, itemName, itemCategory, quantityChanged, notifications);
                 break;
             }
             case 3: {
-                cout << "Enter the name of the stock item: ";
+                cout << "Masukkan nama barang stok: ";
                 cin >> itemName;
-                cout << "Enter the category of the stock item: ";
+                cout << "Masukkan kategori barang stok: ";
                 cin >> itemCategory;
                 deleteStock(stock, itemName, itemCategory, notifications);
                 break;
@@ -221,20 +221,20 @@ int main() {
                 displayStock(stock);
                 break;
             case 5: {
-                cout << "Categories:\n";
+                cout << "Kategori:\n";
                 string prevCategory = "";
                 printCategories(categoryTree, prevCategory);
                 break;
             }
             case 6: {
                 string category;
-                cout << "Enter the category: ";
+                cout << "Masukkan kategori: ";
                 cin >> category;
                 findStockByCategory(stock, category);
                 break;
             }
             case 7: {
-                cout << "Enter the name of the stock item: ";
+                cout << "Masukkan nama dari barang stok: ";
                 cin >> itemName;
                 findStockByName(stock, itemName);
                 break;
@@ -243,10 +243,10 @@ int main() {
                 showNotifications(notifications);
                 break;
             case 9:
-                cout << "Exiting program...\n";
+                cout << "Keluar dari program...\n";
                 break;
             default:
-                cout << "Invalid choice! Please enter a number from 1 to 9." << endl;
+                cout << "Input Invalid! Tolong masukkan nomor dari 1 sampai 9." << endl;
         }        
     } while (choice != 9);
 
